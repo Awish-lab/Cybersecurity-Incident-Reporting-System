@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Monitor and manage cybersecurity incidents."
+    >
+
+    <title>Cyber Incident Management System</title>
+
+    <!-- Theme -->
+    <script>
+        try {
+            document.documentElement.dataset.theme =
+                localStorage.getItem("theme") ||
+                (
+                    matchMedia("(prefers-color-scheme: dark)").matches
+                        ? "dark"
+                        : "light"
+                );
+        } catch (e) {}
+    </script>
+
+    <!-- Qona SACCO favicon -->
+    <link
+        rel="icon"
+        type="image/png"
+        href="/images/qona-logo.png"
+    >
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- JavaScript -->
+    <!-- Chart.js must load before the SOC dashboard -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Main application JavaScript: load only once -->
+<script src="script.js"></script>
+
+<!-- SOC dashboard JavaScript -->
+<script src="soc-dashboard.js"></script>
+</head>
+
+<body>
+
+    <!-- ==========================================
+         SKIP LINK
+    =========================================== -->
+
+    <a class="skip-link" href="#main">
+        Skip to main content
+    </a>
+
+
+    <!-- ==========================================
+         LOGIN SCREEN
+    =========================================== -->
+
+    <div id="loginScreen" class="login-screen">
+
+        <div class="login-card">
+
+            <img
+                src="/images/qona-logo.png"
+                alt="Qona SACCO"
+                class="login-logo"
+            >
+
+            <h1>CyberSecure</h1>
+
+            <p class="login-sub">
+                Sign in to the Incident Management System
+            </p>
+
+
+            <form
+                id="loginForm"
+                onsubmit="login(event)"
+            >
+
+                <div class="form-group">
+
+                    <label for="loginUser">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="loginUser"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="loginPass">
+                        Password
+                    </label>
+
+                    <div class="input-with-btn">
+
+                        <input
+                            type="password"
+                            id="loginPass"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-pass"
+                            onclick="togglePassword('loginPass', this)"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                        >
+                            👁
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    id="loginError"
+                    class="login-error"
+                    role="alert"
+                    hidden
+                ></p>
+
+
+                <button
+                    type="submit"
+                    class="submit-btn login-btn"
+                >
+                    Sign in
+                </button>
+
+            </form>
+
+
+            <div
+                class="demo-box"
+                id="demoBox"
+            >
+
+                <strong>
+                    Demo accounts
+                </strong>
+
+                <span>
+                    Admin:
+                    <code>admin</code>
+                    /
+                    <code>Admin@2026</code>
+                </span>
+
+                <span>
+                    User:
+                    <code>user</code>
+                    /
+                    <code>User@2026</code>
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==========================================
+         SIDEBAR
+    =========================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-plate">
+
+                <img
+                    src="/images/qona-logo.png"
+                    alt="Qona SACCO"
+                    class="qona-logo"
+                >
+
+            </div>
+
+
+            <div class="logo-text">
+
+                <h2>
+                    CyberSecure
+                </h2>
+
+                <span>
+                    Incident Management
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Navigation -->
+
+        <nav aria-label="Main">
+
+            <a
+                href="#dashboard"
+                class="nav-link"
+                data-view="dashboard"
+            >
+                <span aria-hidden="true">
+                    📊
+                </span>
+
+                Dashboard
+            </a>
+
+
+            <a
+                href="#incidents"
+                class="nav-link"
+                data-view="incidents"
+            >
+                <span aria-hidden="true">
+                    🚨
+                </span>
+
+                Incidents
+            </a>
+
+
+            <a
+                href="#investigations"
+                class="nav-link"
+                data-view="investigations"
+                data-admin-only
+            >
+                <span aria-hidden="true">
+                    🔍
+                </span>
+
+                Investigations
+            </a>
+
+
+            <a
+                href="#reports"
+                class="nav-link"
+                data-view="reports"
+                data-admin-only
+            >
+                <span aria-hidden="true">
+                    📈
+                </span>
+
+                Reports
+            </a>
+
+
+            <p class="nav-label">
+                Security tools
+            </p>
+
+
+            <a
+                href="#password"
+                class="nav-link"
+                data-view="password"
+            >
+                <span aria-hidden="true">
+                    🔐
+                </span>
+
+                Password Check
+            </a>
+
+
+            <a
+                href="#phishing"
+                class="nav-link"
+                data-view="phishing"
+            >
+                <span aria-hidden="true">
+                    🎣
+                </span>
+
+                Spot Fake Emails
+            </a>
+
+
+            <p class="nav-label">
+                Admin
+            </p>
+
+
+            <a
+                href="#settings"
+                class="nav-link"
+                data-view="settings"
+                data-admin-only
+            >
+                <span aria-hidden="true">
+                    ⚙️
+                </span>
+
+                Settings
+            </a>
+
+        </nav>
+
+
+        <!-- Sidebar footer -->
+
+        <div class="sidebar-footer">
+
+            <span
+                class="status-dot"
+                aria-hidden="true"
+            ></span>
+
+            System Online
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ==========================================
+         MAIN CONTENT
+    =========================================== -->
+
+    <main
+        class="main-content"
+        id="main"
+    >
+
+
+        <!-- ======================================
+             TOP BAR
+        ======================================= -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1
+                    id="pageTitle"
+                    tabindex="-1"
+                >
+                    Security Dashboard
+                </h1>
+
+                <p id="pageSubtitle">
+                    Monitor and manage cybersecurity incidents
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <span
+                    class="user-badge"
+                    id="userBadge"
+                ></span>
+
+
+                <button
+                    type="button"
+                    class="ghost-btn"
+                    id="themeToggle"
+                    onclick="toggleTheme()"
+                    aria-pressed="false"
+                >
+                    🌙 Dark
+                </button>
+
+
+                <button
+                    type="button"
+                    class="ghost-btn"
+                    onclick="exportIncidentsCSV()"
+                >
+                    ⬇ Export CSV
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-btn"
+                    onclick="openIncidentForm()"
+                >
+                    + Report Incident
+                </button>
+
+
+                <button
+                    type="button"
+                    class="ghost-btn"
+                    onclick="logout()"
+                >
+                    Sign out
+                </button>
+
+            </div>
+
+        </header>
+    
+<!-- =========================================
+     SOC DASHBOARD
+========================================= -->
+<section class="soc-dashboard" aria-label="Security Operations Center dashboard">
+
+    <div class="soc-heading">
+        <div>
+            <p class="soc-eyebrow">SECURITY OPERATIONS CENTER</p>
+            <h2>Security Overview</h2>
+            <p class="soc-subtitle">
+                Monitor incident severity, response status and reporting trends.
+            </p>
+        </div>
+
+        <div class="soc-live">
+            <span class="soc-live-dot"></span>
+            <span id="socConnection">Connecting to database...</span>
+        </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="soc-kpi-grid">
+
+        <article class="soc-kpi-card soc-kpi-total">
+            <div class="soc-kpi-top">
+                <span>Total incidents</span>
+                <span class="soc-kpi-icon">▤</span>
+            </div>
+            <strong id="socTotal">—</strong>
+            <small>All reported cases</small>
+        </article>
+
+        <article class="soc-kpi-card soc-kpi-open">
+            <div class="soc-kpi-top">
+                <span>Open incidents</span>
+                <span class="soc-kpi-icon">◷</span>
+            </div>
+            <strong id="socOpen">—</strong>
+            <small>Awaiting resolution</small>
+        </article>
+
+        <article class="soc-kpi-card soc-kpi-urgent">
+            <div class="soc-kpi-top">
+                <span>Urgent open cases</span>
+                <span class="soc-kpi-icon">⚠</span>
+            </div>
+            <strong id="socUrgent">—</strong>
+            <small>Critical or high severity</small>
+        </article>
+
+        <article class="soc-kpi-card soc-kpi-resolved">
+            <div class="soc-kpi-top">
+                <span>Resolved</span>
+                <span class="soc-kpi-icon">✓</span>
+            </div>
+            <strong id="socResolved">—</strong>
+            <small>Resolved or closed cases</small>
+        </article>
+
+        <article class="soc-kpi-card soc-kpi-recent">
+            <div class="soc-kpi-top">
+                <span>Reported in 24 hours</span>
+                <span class="soc-kpi-icon">↗</span>
+            </div>
+            <strong id="socLast24">—</strong>
+            <small>Newly reported incidents</small>
+        </article>
+
+    </div>
+
+    <!-- Charts -->
+    <div class="soc-chart-grid">
+
+        <article class="soc-panel">
+            <div class="soc-panel-heading">
+                <div>
+                    <h3>Incident reporting trend</h3>
+                    <p>Reports received over the last seven days</p>
+                </div>
+            </div>
+            <div class="soc-chart-area">
+                <canvas id="socTrendChart"
+                    role="img"
+                    aria-label="Line chart of incidents reported each day">
+                </canvas>
+            </div>
+        </article>
+
+        <article class="soc-panel">
+            <div class="soc-panel-heading">
+                <div>
+                    <h3>Severity distribution</h3>
+                    <p>All incidents grouped by severity</p>
+                </div>
+            </div>
+            <div class="soc-chart-area soc-doughnut-area">
+                <canvas id="socSeverityChart"
+                    role="img"
+                    aria-label="Doughnut chart of incident severity">
+                </canvas>
+            </div>
+        </article>
+
+        <article class="soc-panel">
+            <div class="soc-panel-heading">
+                <div>
+                    <h3>Incident status</h3>
+                    <p>Current workflow across all incidents</p>
+                </div>
+            </div>
+            <div class="soc-chart-area">
+                <canvas id="socStatusChart"
+                    role="img"
+                    aria-label="Bar chart of incident statuses">
+                </canvas>
+            </div>
+        </article>
+
+    </div>
+
+    <!-- Recent security alerts -->
+    <article class="soc-panel soc-alert-panel">
+        <div class="soc-panel-heading soc-alert-heading">
+            <div>
+                <h3>Recent security alerts</h3>
+                <p>Latest incidents recorded in the database</p>
+            </div>
+
+            <button type="button" class="ghost-btn" id="socRefreshBtn">
+                ↻ Refresh
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="soc-alert-table">
+                <thead>
+                    <tr>
+                        <th>Incident</th>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Affected system</th>
+                        <th>Status</th>
+                        <th>Date reported</th>
+                    </tr>
+                </thead>
+                <tbody id="socRecentBody">
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            Loading security alerts...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="soc-footer">
+            <span id="socLastUpdated">Waiting for first update...</span>
+            <span>Refresh interval: 60 seconds</span>
+        </div>
+    </article>
+
+</section>
+
+
+
+        <!-- ==========================================
+             DASHBOARD VIEW
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="dashboard"
+        >
+
+            <!-- Hero -->
+
+            <section
+                class="hero"
+                aria-label="Welcome"
+            >
+
+                <div>
+
+                    <h2>
+                        Welcome back,
+                        <span id="welcomeName">
+                            there
+                        </span>
+                        👋
+                    </h2>
+
+                    <p>
+                        Stay one step ahead of attackers.
+                        Test a password or practise spotting
+                        fake emails in two minutes.
+                    </p>
+
+                </div>
+
+
+                <div class="hero-actions">
+
+                    <a
+                        class="hero-btn"
+                        href="#password"
+                    >
+                        🔐 Check a password
+                    </a>
+
+                    <a
+                        class="hero-btn"
+                        href="#phishing"
+                    >
+                        🎣 Spot fake emails
+                    </a>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- Statistics -->
+
+            <section
+                class="stats-grid"
+                aria-label="Incident statistics"
+            >
+
+                <div class="stat-card critical">
+
+                    <div
+                        class="stat-icon"
+                        aria-hidden="true"
+                    >
+                        🚨
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Critical Incidents
+                        </span>
+
+                        <h2
+                            id="criticalCount"
+                            aria-live="polite"
+                        >
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card high">
+
+                    <div
+                        class="stat-icon"
+                        aria-hidden="true"
+                    >
+                        ⚠️
+                    </div>
+
+                    <div>
+
+                        <span>
+                            High Severity
+                        </span>
+
+                        <h2
+                            id="highCount"
+                            aria-live="polite"
+                        >
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card medium">
+
+                    <div
+                        class="stat-icon"
+                        aria-hidden="true"
+                    >
+                        🔶
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Medium Severity
+                        </span>
+
+                        <h2
+                            id="mediumCount"
+                            aria-live="polite"
+                        >
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card resolved">
+
+                    <div
+                        class="stat-icon"
+                        aria-hidden="true"
+                    >
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Resolved
+                        </span>
+
+                        <h2
+                            id="resolvedCount"
+                            aria-live="polite"
+                        >
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- Latest incidents -->
+
+            <section
+                class="content-card"
+                aria-labelledby="recentHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="recentHeading">
+                            Latest Incidents
+                        </h2>
+
+                        <p>
+                            The five most recently reported events
+                        </p>
+
+                    </div>
+
+
+                    <a
+                        class="ghost-btn link-btn"
+                        href="#incidents"
+                    >
+                        View all incidents →
+                    </a>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <caption class="visually-hidden">
+                            Latest incidents
+                        </caption>
+
+                        <thead>
+
+                            <tr>
+
+                                <th scope="col">
+                                    ID
+                                </th>
+
+                                <th scope="col">
+                                    Incident
+                                </th>
+
+                                <th scope="col">
+                                    Type
+                                </th>
+
+                                <th scope="col">
+                                    Severity
+                                </th>
+
+                                <th scope="col">
+                                    Status
+                                </th>
+
+                                <th scope="col">
+                                    Reported
+                                </th>
+
+                                <th scope="col">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="recentTable">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="empty-state"
+                                >
+                                    No incidents reported yet.
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             INCIDENTS VIEW
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="incidents"
+            hidden
+        >
+
+            <section
+                class="content-card"
+                aria-labelledby="incidentsHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="incidentsHeading">
+                            Recent Security Incidents
+                        </h2>
+
+                        <p>
+                            Latest reported cybersecurity events
+                        </p>
+
+                    </div>
+
+
+                    <div class="filters">
+
+                        <label
+                            for="searchInput"
+                            class="visually-hidden"
+                        >
+                            Search incidents
+                        </label>
+
+                        <input
+                            type="search"
+                            id="searchInput"
+                            placeholder="Search incidents..."
+                            oninput="filterIncidents()"
+                        >
+
+
+                        <label
+                            for="severityFilter"
+                            class="visually-hidden"
+                        >
+                            Filter by severity
+                        </label>
+
+                        <select
+                            id="severityFilter"
+                            onchange="filterIncidents()"
+                        >
+
+                            <option value="all">
+                                All Severity
+                            </option>
+
+                            <option value="Critical">
+                                Critical
+                            </option>
+
+                            <option value="High">
+                                High
+                            </option>
+
+                            <option value="Medium">
+                                Medium
+                            </option>
+
+                            <option value="Low">
+                                Low
+                            </option>
+
+                        </select>
+
+
+                        <label
+                            for="statusFilter"
+                            class="visually-hidden"
+                        >
+                            Filter by status
+                        </label>
+
+                        <select
+                            id="statusFilter"
+                            onchange="filterIncidents()"
+                        >
+
+                            <option value="all">
+                                All Status
+                            </option>
+
+                            <option value="NEW">
+                                New
+                            </option>
+
+                            <option value="UNDER INVESTIGATION">
+                                Under investigation
+                            </option>
+
+                            <option value="CONTAINED">
+                                Contained
+                            </option>
+
+                            <option value="RESOLVED">
+                                Resolved
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <caption class="visually-hidden">
+                            Reported security incidents
+                        </caption>
+
+                        <thead>
+
+                            <tr>
+
+                                <th
+                                    scope="col"
+                                    data-sort="IncidentID"
+                                    aria-sort="none"
+                                >
+                                    <button
+                                        type="button"
+                                        class="sort-btn"
+                                    >
+                                        ID
+                                    </button>
+                                </th>
+
+                                <th
+                                    scope="col"
+                                    data-sort="IncidentTitle"
+                                    aria-sort="none"
+                                >
+                                    <button
+                                        type="button"
+                                        class="sort-btn"
+                                    >
+                                        Incident
+                                    </button>
+                                </th>
+
+                                <th
+                                    scope="col"
+                                    data-sort="IncidentType"
+                                    aria-sort="none"
+                                >
+                                    <button
+                                        type="button"
+                                        class="sort-btn"
+                                    >
+                                        Type
+                                    </button>
+                                </th>
+
+                                <th
+                                    scope="col"
+                                    data-sort="Severity"
+                                    aria-sort="none"
+                                >
+                                    <button
+                                        type="button"
+                                        class="sort-btn"
+                                    >
+                                        Severity
+                                    </button>
+                                </th>
+
+                                <th
+                                    scope="col"
+                                    data-sort="Status"
+                                    aria-sort="none"
+                                >
+                                    <button
+                                        type="button"
+                                        class="sort-btn"
+                                    >
+                                        Status
+                                    </button>
+                                </th>
+
+                                <th
+                                    scope="col"
+                                    data-sort="DateReported"
+                                    aria-sort="none"
+                                >
+                                    <button
+                                        type="button"
+                                        class="sort-btn"
+                                    >
+                                        Reported
+                                    </button>
+                                </th>
+
+                                <th scope="col">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="incidentTable">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="empty-state"
+                                >
+                                    No incidents reported yet.
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <p
+                    class="table-footer"
+                    id="resultCount"
+                ></p>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             PASSWORD CHECKER
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="password"
+            hidden
+        >
+
+            <section
+                class="content-card"
+                aria-labelledby="pwHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="pwHeading">
+                            Password Strength Checker
+                        </h2>
+
+                        <p>
+                            Checked in your browser only.
+                            Nothing you type is sent or saved.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="pw-panel">
+
+                    <div class="form-group">
+
+                        <label for="pwInput">
+                            Type a password to test it
+                        </label>
+
+                        <div class="input-with-btn">
+
+                            <input
+                                type="password"
+                                id="pwInput"
+                                autocomplete="off"
+                                spellcheck="false"
+                                oninput="checkPassword()"
+                            >
+
+                            <button
+                                type="button"
+                                class="toggle-pass"
+                                onclick="togglePassword('pwInput', this)"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
+                                👁
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="pw-meter"
+                        id="pwMeter"
+                        data-level="0"
+                        aria-hidden="true"
+                    >
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                    </div>
+
+
+                    <p
+                        class="pw-summary"
+                        id="pwSummary"
+                        aria-live="polite"
+                    >
+                        Start typing to see how strong it is.
+                    </p>
+
+
+                    <ul
+                        class="pw-checks"
+                        id="pwChecks"
+                    ></ul>
+
+
+                    <div class="pw-actions">
+
+                        <button
+                            type="button"
+                            class="submit-btn"
+                            onclick="generatePassword()"
+                        >
+                            Generate a strong password
+                        </button>
+
+                        <button
+                            type="button"
+                            class="ghost-btn"
+                            onclick="copyPassword()"
+                        >
+                            Copy
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="content-card"
+                aria-labelledby="pwTipsHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="pwTipsHeading">
+                            What makes a password strong?
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <ul class="plain-list">
+
+                    <li>
+                        <strong>
+                            Length beats complexity.
+                        </strong>
+
+                        Aim for 14 or more characters.
+                        A phrase of four random words is
+                        strong and easy to remember.
+                    </li>
+
+
+                    <li>
+                        <strong>
+                            Never reuse passwords.
+                        </strong>
+
+                        If one site is breached,
+                        attackers try the same password everywhere.
+                    </li>
+
+
+                    <li>
+                        <strong>
+                            Avoid personal details.
+                        </strong>
+
+                        Names, birthdays, phone numbers
+                        and "Qona" or "sacco" are the first
+                        things guessed.
+                    </li>
+
+
+                    <li>
+                        <strong>
+                            Use a password manager
+                        </strong>
+
+                        and turn on two-factor authentication
+                        wherever it is offered.
+                    </li>
+
+                </ul>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             PHISHING VIEW
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="phishing"
+            hidden
+        >
+
+            <section
+                class="content-card"
+                aria-labelledby="flagsHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="flagsHeading">
+                            How to spot a fake email
+                        </h2>
+
+                        <p>
+                            Six warning signs to check before
+                            you click anything
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="report-btn"
+                        onclick="reportPhishing()"
+                    >
+                        Report a suspicious email
+                    </button>
+
+                </div>
+
+
+                <ul class="tips-grid">
+
+                    <li class="tip-card">
+
+                        <span aria-hidden="true">
+                            📧
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Check the sender
+                            </h3>
+
+                            <p>
+                                Look at the real address,
+                                not just the display name.
+                                Lookalike domains such as
+                                qona-sacco-verify.com are not yours.
+                            </p>
+
+                        </div>
+
+                    </li>
+
+
+                    <li class="tip-card">
+
+                        <span aria-hidden="true">
+                            ⏰
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Urgency and threats
+                            </h3>
+
+                            <p>
+                                "Act now or lose access."
+                                Attackers rush you so you
+                                skip the thinking step.
+                            </p>
+
+                        </div>
+
+                    </li>
+
+
+                    <li class="tip-card">
+
+                        <span aria-hidden="true">
+                            👋
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Generic greeting
+                            </h3>
+
+                            <p>
+                                Real messages from people
+                                you deal with usually use
+                                your name and details.
+                            </p>
+
+                        </div>
+
+                    </li>
+
+
+                    <li class="tip-card">
+
+                        <span aria-hidden="true">
+                            🔗
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Hover before you click
+                            </h3>
+
+                            <p>
+                                Hover over a link to see
+                                where it really goes.
+                                Shortened links hide the destination.
+                            </p>
+
+                        </div>
+
+                    </li>
+
+
+                    <li class="tip-card">
+
+                        <span aria-hidden="true">
+                            📎
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Unexpected attachments
+                            </h3>
+
+                            <p>
+                                Be careful with invoices
+                                you didn't expect, and files
+                                ending in .zip, .exe or .pdf.exe.
+                            </p>
+
+                        </div>
+
+                    </li>
+
+
+                    <li class="tip-card">
+
+                        <span aria-hidden="true">
+                            🔑
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Asks for secrets or money
+                            </h3>
+
+                            <p>
+                                No genuine IT desk asks
+                                for your password.
+                                Be wary of gift cards and
+                                urgent transfers.
+                            </p>
+
+                        </div>
+
+                    </li>
+
+                </ul>
+
+
+                <p class="note">
+                    Not sure? Don't click.
+                    Contact the sender using a phone number
+                    or address you already know, then report it.
+                </p>
+
+            </section>
+
+
+            <section
+                class="content-card"
+                aria-labelledby="quizHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="quizHeading">
+                            Test yourself: real or fake?
+                        </h2>
+
+                        <p>
+                            Read each email and decide
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="quiz"
+                    id="quizBox"
+                ></div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             INVESTIGATIONS
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="investigations"
+            hidden
+        >
+
+            <section
+                class="content-card"
+                aria-labelledby="boardHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="boardHeading">
+                            Investigation Board
+                        </h2>
+
+                        <p>
+                            Follow each case from report
+                            to resolution. Select a card
+                            to view it and update its status.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="board"
+                    id="investigationBoard"
+                ></div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             REPORTS
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="reports"
+            hidden
+        >
+
+            <section
+                class="stats-grid"
+                id="reportKpis"
+                aria-label="Report summary"
+            ></section>
+
+
+            <section
+                class="content-card"
+                aria-labelledby="reportHeading"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 id="reportHeading">
+                            Incident Breakdown
+                        </h2>
+
+                        <p>
+                            How incidents are distributed
+                            across severity, type and status
+                        </p>
+
+                    </div>
+
+
+                    <div class="topbar-actions">
+
+                        <button
+                            type="button"
+                            class="ghost-btn"
+                            onclick="exportIncidentsCSV()"
+                        >
+                            ⬇ Export CSV
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="ghost-btn"
+                            onclick="window.print()"
+                        >
+                            🖨 Print report
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="report-grid"
+                    id="reportCharts"
+                ></div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             SETTINGS
+        =========================================== -->
+
+        <div
+            class="view"
+            data-view="settings"
+            hidden
+        >
+
+            <div class="settings-grid">
+
+
+                <!-- Appearance -->
+
+                <section
+                    class="content-card"
+                    aria-labelledby="appearanceHeading"
+                >
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h2 id="appearanceHeading">
+                                Appearance
+                            </h2>
+
+                            <p>
+                                Choose how the dashboard looks
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <label for="themeSelect">
+                            Theme
+                        </label>
+
+                        <select
+                            id="themeSelect"
+                            onchange="setThemePreference(this.value)"
+                        >
+
+                            <option value="system">
+                                Match system
+                            </option>
+
+                            <option value="light">
+                                Light
+                            </option>
+
+                            <option value="dark">
+                                Dark
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- Data -->
+
+                <section
+                    class="content-card"
+                    aria-labelledby="dataHeading"
+                >
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h2 id="dataHeading">
+                                Data
+                            </h2>
+
+                            <p>
+                                Reload or download your
+                                incident records
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <span>
+                            Reload incidents from the database
+                        </span>
+
+                        <button
+                            type="button"
+                            class="ghost-btn"
+                            onclick="refreshData()"
+                        >
+                            ↻ Refresh
+                        </button>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <span>
+                            Download all incidents as a spreadsheet
+                        </span>
+
+                        <button
+                            type="button"
+                            class="ghost-btn"
+                            onclick="exportIncidentsCSV()"
+                        >
+                            ⬇ Export CSV
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- About -->
+
+                <section
+                    class="content-card"
+                    aria-labelledby="aboutHeading"
+                >
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h2 id="aboutHeading">
+                                About
+                            </h2>
+
+                            <p>
+                                CyberSecure Incident Management
+                                for Qona SACCO
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <span>
+                            Incidents loaded
+                        </span>
+
+                        <strong id="aboutCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             SYSTEM INFORMATION
+        =========================================== -->
+
+        <footer class="system-info">
+
+            <div>
+
+                <strong>
+                    Security Monitoring
+                </strong>
+
+                <p>
+                    Real-time incident monitoring and management
+                </p>
+
+            </div>
+
+
+            <div class="online">
+
+                <span
+                    class="status-dot"
+                    aria-hidden="true"
+                ></span>
+
+                All systems operational
+
+            </div>
+
+        </footer>
+
+    </main>
+
+
+
+    <!-- ==========================================
+         REPORT INCIDENT MODAL
+    =========================================== -->
+
+    <div
+        id="incidentModal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reportTitle"
+    >
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="reportTitle">
+                        Report Security Incident
+                    </h2>
+
+                    <p>
+                        Provide details about the security event.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    aria-label="Close"
+                    onclick="closeIncidentForm()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <form
+                id="incidentForm"
+                onsubmit="submitIncident(event)"
+            >
+
+                <div class="form-grid">
+
+
+                    <div class="form-group full">
+
+                        <label for="incidentTitle">
+                            Incident Title
+                        </label>
+
+                        <input
+                            type="text"
+                            id="incidentTitle"
+                            placeholder="Example: Phishing email detected"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="incidentType">
+                            Incident Type
+                        </label>
+
+                        <select
+                            id="incidentType"
+                            required
+                        >
+
+                            <option value="">
+                                Select type
+                            </option>
+
+                            <option value="Phishing">
+                                Phishing
+                            </option>
+
+                            <option value="Malware">
+                                Malware
+                            </option>
+
+                            <option value="Unauthorized Access">
+                                Unauthorized Access
+                            </option>
+
+                            <option value="Data Breach">
+                                Data Breach
+                            </option>
+
+                            <option value="Ransomware">
+                                Ransomware
+                            </option>
+
+                            <option value="Network Attack">
+                                Network Attack
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="incidentSeverity">
+                            Severity
+                        </label>
+
+                        <select
+                            id="incidentSeverity"
+                            required
+                        >
+
+                            <option value="">
+                                Select severity
+                            </option>
+
+                            <option value="Critical">
+                                Critical
+                            </option>
+
+                            <option value="High">
+                                High
+                            </option>
+
+                            <option value="Medium">
+                                Medium
+                            </option>
+
+                            <option value="Low">
+                                Low
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="affectedSystem">
+                            Affected System
+                        </label>
+
+                        <input
+                            type="text"
+                            id="affectedSystem"
+                            placeholder="Example: Finance Server"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="reportedBy">
+                            Reported By
+                        </label>
+
+                        <input
+                            type="text"
+                            id="reportedBy"
+                            placeholder="Your name"
+                            autocomplete="name"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group full">
+
+                        <label for="incidentDescription">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="incidentDescription"
+                            rows="5"
+                            placeholder="Describe what happened..."
+                            required
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-btn"
+                        onclick="closeIncidentForm()"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="submit-btn"
+                    >
+                        Submit Incident
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==========================================
+         INCIDENT DETAILS MODAL
+    =========================================== -->
+
+    <div
+        id="incidentDetailsModal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detailsTitle"
+    >
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="detailsTitle">
+                        Incident Details
+                    </h2>
+
+                    <p>
+                        Detailed information about the security incident.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    aria-label="Close"
+                    onclick="closeIncidentDetails()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <div class="incident-details">
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Incident ID
+                    </span>
+
+                    <strong id="detailIncidentID">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Incident Title
+                    </span>
+
+                    <strong id="detailIncidentTitle">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Incident Type
+                    </span>
+
+                    <strong id="detailIncidentType">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Severity
+                    </span>
+
+                    <strong id="detailIncidentSeverity">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Affected System
+                    </span>
+
+                    <strong id="detailAffectedSystem">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Reported By
+                    </span>
+
+                    <strong id="detailReportedBy">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <label for="detailStatus">
+                        Status
+                    </label>
+
+                    <select
+                        id="detailStatus"
+                        class="detail-status-select"
+                    >
+
+                        <option value="NEW">
+                            NEW
+                        </option>
+
+                        <option value="UNDER INVESTIGATION">
+                            UNDER INVESTIGATION
+                        </option>
+
+                        <option value="CONTAINED">
+                            CONTAINED
+                        </option>
+
+                        <option value="RESOLVED">
+                            RESOLVED
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <div class="detail-item">
+
+                    <span>
+                        Date Reported
+                    </span>
+
+                    <strong id="detailDateReported">
+                        -
+                    </strong>
+
+                </div>
+
+
+
+                <div class="detail-description">
+
+                    <span>
+                        Description
+                    </span>
+
+                    <p id="detailDescription">
+                        -
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="form-actions">
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    onclick="closeIncidentDetails()"
+                >
+                    Close
+                </button>
+
+
+                <button
+                    type="button"
+                    class="submit-btn"
+                    id="saveStatusBtn"
+                    onclick="saveIncidentStatus()"
+                >
+                    Save Status
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Toast notifications -->
+
+    <div
+        id="toastContainer"
+        class="toast-container"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+
+</body>
+
+</html>

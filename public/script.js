@@ -1076,4 +1076,4 @@ document.addEventListener("DOMContentLoaded", () => {
         if (trigger) viewIncident(trigger.dataset.incidentId);
     });
 
-});
+}); 	Q		a	q`q	
